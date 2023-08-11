@@ -108,6 +108,12 @@ class _InsertionService {
    * @returns {Promise<void>}
    */
   public async upsert(type: DataTypes, data: DataSets): Promise<void> {
+
+    // Run active upsert
+    if (['bids', 'asks'].includes(type)) {
+      await this.upsertActive(type, data);
+    }
+
     data = this._filter(type, data);
 
     if (!this.insertionTally[type]) {
@@ -115,6 +121,11 @@ class _InsertionService {
     }
 
     this.insertionTally[type] += data.length;
+    
+    // If not enabled return
+    if (process.env[`SYNC_${type.toUpperCase()}`] !== '1') {
+      return;
+    }
 
     for await (const record of data) {
       const formatted = this._format(type, record);
@@ -129,6 +140,55 @@ class _InsertionService {
 
     return;
   }
+
+  /**
+   * Inserts new data or updates existing data in the database.
+   * @param {DataTypes} type - Type of the data to be upserted.
+   * @param {DataSets} data - The actual data to be upserted.
+   * @returns {Promise<void>}
+   */
+  public async upsertActive(type: DataTypes, data: DataSets): Promise<void> {
+
+    // If not enabled return
+    if (process.env[`SYNC_ACTIVE_${type.toUpperCase()}`] !== '1') {
+      return;
+    }
+
+    data = this._filter(type, data);
+
+    // if (!this.insertionTally[type]) {
+    //   this.insertionTally[type] = 0;
+    // }
+
+    // this.insertionTally[type] += data.length;
+
+    for await (const record of data) {
+      const formatted = this._format(type, record);
+
+      // @ts-ignore Prisma doesn't support model reference by variable name.
+      // See https://github.com/prisma/prisma/discussions/16058#discussioncomment-5493
+      const caller = this._prisma[type+`_active`];
+      // @ts-ignore Interface includes all types and not all have status
+      if (formatted?.status === 'active') {
+        return await caller.upsert({
+          where: { id: formatted.id },
+          create: formatted,
+          update: formatted,
+        });
+      }
+      else {
+        // using regular .delete crashed prisma if record is not there
+        // see https://github.com/prisma/prisma/issues/9460
+        return await caller.deleteMany({
+          where: { id: formatted.id }
+        });
+      }
+
+    }
+
+    return;
+  }
+
   /**
    * Filters the input data based on the available contracts.
    * @param {DataTypes} type - The type of the data ('asks', 'bids', 'sales').
@@ -186,6 +246,7 @@ class _InsertionService {
   ): DataReturns[T] {
     if (type === "asks") {
       const ask = data as AsksSchema;
+      // @ts-ignore latest main fails without this
       return {
         id: Buffer.from(
           `${ask?.id}-${ask?.contract}-${ask?.maker}-${ask?.tokenSetId}-${ask?.createdAt}`,
@@ -237,6 +298,7 @@ class _InsertionService {
 
     if (type === "bids") {
       const bid = data as BidsSchema;
+      // @ts-ignore latest main fails without this
       return {
         id: Buffer.from(
           `${bid?.id}-${bid?.contract}-${bid?.maker}-${bid?.tokenSetId}-${bid?.createdAt}`,
@@ -286,6 +348,7 @@ class _InsertionService {
 
     if (type === "sales") {
       const sale = data as SalesSchema;
+      // @ts-ignore latest main fails without this
       return {
         id: Buffer.from(`${sale.txHash}-${sale.logIndex}-${sale.batchIndex}`),
         sale_id: toBuffer(sale?.saleId),
@@ -322,6 +385,7 @@ class _InsertionService {
 
     if (type === "transfers") {
       const transfer = data as TransfersSchema;
+      // @ts-ignore latest main fails without this
       return {
         id: Buffer.from(
           `${transfer.txHash}-${transfer.logIndex}-${transfer.batchIndex}`,

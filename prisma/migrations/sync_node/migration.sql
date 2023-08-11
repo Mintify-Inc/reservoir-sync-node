@@ -44,6 +44,51 @@ CREATE TABLE "asks" (
 );
 
 -- CreateTable
+CREATE TABLE "asks_active" (
+    "id" BYTEA NOT NULL,
+    "kind" TEXT,
+    "side" TEXT,
+    "status" TEXT,
+    "token_set_id" TEXT,
+    "token_set_schema_hash" BYTEA,
+    "contract" BYTEA,
+    "maker" BYTEA,
+    "taker" BYTEA,
+    "price_currency_contract" BYTEA,
+    "price_currency_name" TEXT,
+    "price_currency_symbol" TEXT,
+    "price_currency_decimals" TEXT,
+    "price_amount_raw" TEXT,
+    "price_amount_decimal" TEXT,
+    "price_amount_usd" TEXT,
+    "price_amount_native" TEXT,
+    "price_net_amount_raw" TEXT,
+    "price_net_amount_decimal" TEXT,
+    "price_net_amount_usd" TEXT,
+    "price_net_amount_native" TEXT,
+    "valid_from" TEXT,
+    "valid_until" TEXT,
+    "quantity_filled" TEXT,
+    "quantity_remaining" TEXT,
+    "criteria_kind" TEXT,
+    "criteria_data_token_token_id" TEXT,
+    "source_id" TEXT,
+    "source_domain" TEXT,
+    "source_name" TEXT,
+    "source_icon" TEXT,
+    "source_url" TEXT,
+    "fee_bps" TEXT,
+    "fee_breakdown" JSONB,
+    "expiration" TEXT,
+    "is_reservoir" BOOLEAN,
+    "is_dynamic" BOOLEAN,
+    "created_at" TIMESTAMP,
+    "updated_at" TIMESTAMP,
+
+    CONSTRAINT "asks_active_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "sales" (
     "id" BYTEA NOT NULL,
     "sale_id" BYTEA,
@@ -120,6 +165,51 @@ CREATE TABLE "bids" (
     "updated_at" TIMESTAMP,
 
     CONSTRAINT "bids_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "bids_active" (
+    "id" BYTEA NOT NULL,
+    "kind" TEXT,
+    "side" TEXT,
+    "status" TEXT,
+    "token_set_id" TEXT,
+    "token_set_schema_hash" BYTEA,
+    "contract" BYTEA,
+    "maker" BYTEA,
+    "taker" BYTEA,
+    "price_currency_contract" BYTEA,
+    "price_currency_name" TEXT,
+    "price_currency_symbol" TEXT,
+    "price_currency_decimals" TEXT,
+    "price_amount_raw" TEXT,
+    "price_amount_decimal" TEXT,
+    "price_amount_usd" TEXT,
+    "price_amount_native" TEXT,
+    "price_net_amount_raw" TEXT,
+    "price_net_amount_decimal" TEXT,
+    "price_net_amount_usd" TEXT,
+    "price_net_amount_native" TEXT,
+    "valid_from" TEXT,
+    "valid_until" TEXT,
+    "quantity_filled" TEXT,
+    "quantity_remaining" TEXT,
+    "criteria_kind" TEXT,
+    "criteria_data_token_token_id" TEXT,
+    "source_id" TEXT,
+    "source_domain" TEXT,
+    "source_name" TEXT,
+    "source_icon" TEXT,
+    "source_url" TEXT,
+    "fee_bps" TEXT,
+    "fee_breakdown" JSONB,
+    "expiration" TEXT,
+    "is_reservoir" BOOLEAN,
+    "is_dynamic" BOOLEAN,
+    "created_at" TIMESTAMP,
+    "updated_at" TIMESTAMP,
+    
+    CONSTRAINT "bids_active_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
